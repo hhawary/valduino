@@ -43,7 +43,7 @@ void pinMode(uint8_t pin, uint8_t mode)
 	// JWS: can I let the optimizer do this?
 	reg = portModeRegister(port); 				// Hussein: Create this function plz :)
 	out = portOutputRegister(port);				// Hussein: Create this function plz :)
-	pull = portPullRegister(port);
+	pull = portPullRegister(port);	//FIXME: Asmaa: PU configuration
 
 // Ammar & asmaa & magdy : 3eeeesh ya 3ammaaaaar enta we asmaaaaaaa we magdyyyyyy :D
 	if (mode == INPUT) { 
