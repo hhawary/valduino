@@ -35,12 +35,6 @@
  */
 #include "iodefine.h"
 
-
-/*
- *  This macro takes the bit number and returns the bit mask
- */
-#define _BV(bit) (1<<bit)	//FIXME: Move this macro to a suitable library
-
 #ifndef VALDUINO
 #define VALDUINO
 #endif

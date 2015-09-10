@@ -48,24 +48,24 @@ void pinMode(uint8_t pin, uint8_t mode)
 // Ammar & asmaa & magdy : 3eeeesh ya 3ammaaaaar enta we asmaaaaaaa we magdyyyyyy :D
 	if (mode == INPUT) { 
 		//uint8_t oldSREG = SREG;
-        //cli();
-		DI();
+        cli();
+		//DI();
         //FIXME: check this info -> Set all the ports by default PM as an input in the init function
 		*reg |= bit;
 		*out &= ~bit;
 		//SREG = oldSREG;
 	} else if (mode == INPUT_PULLUP) {
 		//uint8_t oldSREG = SREG;
-                //cli();
-		DI();
+        cli();
+		//DI();
 		*reg |= bit;
 		//*out |= bit;
 		*pull |= bit;
 		//SREG = oldSREG;
 	} else {
 		//uint8_t oldSREG = SREG;
-                //cli();
-		DI();
+        cli();
+		//DI();
 		*reg &= ~bit;
 		//SREG = oldSREG;
 	}
@@ -88,8 +88,8 @@ void digitalWrite(uint8_t pin, uint8_t val)
 	out = portOutputRegister(port);
 
 	//uint8_t oldSREG = SREG;
-	//cli();
-	DI();
+	cli();
+	//DI();
 
 	if (val == LOW) {
 		*out &= ~bit;

@@ -23,12 +23,19 @@
 #ifndef WiringPrivate_h
 #define WiringPrivate_h
 
-#ifndef Arduino_h
+//#ifndef Arduino_h
 #include "Arduino.h"
-#endif
+//#endif
 
 #ifdef __cplusplus
 extern "C"{
+#endif
+
+#ifndef cbi
+#define cbi(sfr, bit) (sfr &= ~_BV(bit))
+#endif
+#ifndef sbi
+#define sbi(sfr, bit) (sfr |= _BV(bit))
 #endif
 
 #ifdef __cplusplus

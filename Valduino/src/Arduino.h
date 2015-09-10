@@ -92,6 +92,15 @@ extern "C"{
 #define interrupts() EI()
 #define noInterrupts() DI()
 
+
+/*
+ *  This macro takes the bit number and returns the bit mask
+ */
+#define _BV(bit) (1<<bit)	//FIXME: Move this macro to a suitable library
+
+#define sei() EI()
+#define cli() DI()
+
 #define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 //#define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
 //#define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
