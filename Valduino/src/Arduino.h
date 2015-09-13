@@ -149,7 +149,7 @@ void loop(void);
 #define portInputRegister(P) port_to_output_PGM[P]
 #define portPullRegister(P)	port_to_pullup_PGM[P]
 #define portModeRegister(P) port_to_mode_PGM[P]
-//#define digitalPinToTimer(P) ( pgm_read_byte( digital_pin_to_timer_PGM + (P) ) ) //TODO: Hussein: edit this to select the timer map it with a io port
+#define digitalPinToTimer(P) digital_pin_to_timer_PGM[P] // Hussein: edit this to select the timer map it with a io port
 
 #define NOT_A_PIN 255
 #define NOT_A_PORT 255

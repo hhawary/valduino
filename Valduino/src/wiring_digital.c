@@ -73,7 +73,7 @@ void pinMode(uint8_t pin, uint8_t mode)
 
 void digitalWrite(uint8_t pin, uint8_t val)
 {
-	//uint8_t timer = digitalPinToTimer(pin); // TODO: Hussein: After hussein finish this function uncomment this
+	uint8_t timer = digitalPinToTimer(pin); // Hussein: After hussein finish this function uncomment this
 	uint8_t bit = digitalPinToBitMask(pin);
 	uint8_t port = digitalPinToPort(pin);
 	volatile uint8_t *out;
@@ -82,7 +82,7 @@ void digitalWrite(uint8_t pin, uint8_t val)
 
 	// If the pin that support PWM output, we need to turn it off
 	// before doing a digital write.
-	//if (timer != NOT_ON_TIMER) turnOffPWM(timer); // TODO: Hussein: uncomment this line when finish this function
+	//if (timer != NOT_ON_TIMER) turnOffPWM(timer); //TODO: Hossam: uncomment this line when finish this function
 
 	out = portOutputRegister(port);
 

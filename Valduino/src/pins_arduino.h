@@ -41,8 +41,7 @@
 
 //HUSSEIN: ADD VALDUINO DEFINE HERE PLZ
 #ifdef VALDUINO
-
-#define digitalPinHasPWM(p)         ((p) == 9 || (p) == 10 || (p) == 11) //TODO: Hussein: add all ports that support PWM
+#define digitalPinHasPWM(p)  (p==11 || p==46 || p==47 || p==49 || p==50 || p==51 || p==52 || p==54 || p==55 || p==57 || p==59 || p==60 || p==61 || p==62 || p==99 || p==100 ) // Hussein: add all ports that support PWM
 //FIXME: add array to program memory
 volatile uint8_t digital_pin_to_port_PGM[] = {
 	NOT_A_PORT,
