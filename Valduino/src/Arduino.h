@@ -149,7 +149,12 @@ void loop(void);
 #define portInputRegister(P) port_to_output_PGM[P]
 #define portPullRegister(P)	port_to_pullup_PGM[P]
 #define portModeRegister(P) port_to_mode_PGM[P]
-#define digitalPinToTimer(P) digital_pin_to_timer_PGM[P] // Hussein: edit this to select the timer map it with a io port
+#define digitalPinToTimer(P) digital_pin_to_timer_PGM[P] // Hussein: edit this to select the timer map it with an io port
+
+// TDRmn -> Timer Data Register (master)
+// TDRmp -> Timer Data Register (slave)
+#define dutyToTDRmp(duty, TDRmn) (uint16_t)duty*(TDRmn+1)/255
+#define periodToTDRmn(period) (uint16_t) (period*F_CPU)-1
 
 #define NOT_A_PIN 255
 #define NOT_A_PORT 255
@@ -173,8 +178,6 @@ void loop(void);
 #define TIMER15 14
 #define TIMER16 15
 #define TIMER17 16
-
-
 
 #ifdef VALDUINO
 #define _P0 0
