@@ -154,7 +154,7 @@ void loop(void);
 // TDRmn -> Timer Data Register (master)
 // TDRmp -> Timer Data Register (slave)
 #define dutyToTDRmp(duty, TDRmn) (uint16_t)duty*(TDRmn+1)/255
-#define periodToTDRmn(period) (uint16_t) (period*F_CPU)-1
+#define msperiodToTDRmn(msperiod) (uint16_t) ((msperiod*F_CPU)/1000)-1
 
 #define NOT_A_PIN 255
 #define NOT_A_PORT 255
