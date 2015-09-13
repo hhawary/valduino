@@ -153,7 +153,7 @@ void loop(void);
 
 #define NOT_A_PIN 255
 #define NOT_A_PORT 255
-//TODO: Asmaa: Edit this part to define all the timer channels here
+//Asmaa: Edit this part to define all the timer channels here
 #define NOT_ON_TIMER 0
 #define TIMER0A 1
 #define TIMER0B 2
@@ -174,6 +174,27 @@ void loop(void);
 #define TIMER5A 16
 #define TIMER5B 17
 #define TIMER5C 18
+
+
+#define NOT_ON_TIMER 0
+#define TIMER00 1
+#define TIMER01 2
+#define TIMER02 3
+#define TIMER03 4
+#define TIMER04 5
+#define TIMER05 6
+#define TIMER06 7
+#define TIMER07 8
+
+#define TIMER10 9
+#define TIMER11 10
+#define TIMER12 11
+#define TIMER13 12
+#define TIMER14 13
+#define TIMER15 14
+#define TIMER16 15
+#define TIMER17 16
+
 
 
 #ifdef VALDUINO
