@@ -23,7 +23,7 @@
 */
 
 #include "wiring_private.h"
-//#include "pins_arduino.h"
+#include "pins_arduino.h"
 
 uint8_t analog_reference = DEFAULT;
 
@@ -104,6 +104,7 @@ int analogRead(uint8_t pin)
 // TODO: Asmaa: edit this section from AVR to RL78
 void analogWrite(uint8_t pin, int val)
 {
+	uint8_t timer = digitalPinToTimer(pin);
 	/*
 	// We need to make sure the PWM output is enabled for those pins
 	// that support it, as we turn it off when digitally reading or

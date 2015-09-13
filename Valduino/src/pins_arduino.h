@@ -43,7 +43,7 @@
 #ifdef VALDUINO
 #define digitalPinHasPWM(p)  (p==11 || p==46 || p==47 || p==49 || p==50 || p==51 || p==52 || p==54 || p==55 || p==57 || p==59 || p==60 || p==61 || p==62 || p==99 || p==100 ) // Hussein: add all ports that support PWM
 //FIXME: add array to program memory
-volatile uint8_t digital_pin_to_port_PGM[] = {
+static volatile uint8_t digital_pin_to_port_PGM[] = {
 	NOT_A_PORT,
 	_P15,
 	_P15,
@@ -148,7 +148,7 @@ volatile uint8_t digital_pin_to_port_PGM[] = {
 };
 
 //FIXME: add array to program memory
-volatile uint8_t *  port_to_output_PGM[] = {
+static volatile uint8_t *  port_to_output_PGM[] = {
 	&P0,
 	&P1,
 	(volatile uint8_t*)NOT_A_PORT,
@@ -169,7 +169,7 @@ volatile uint8_t *  port_to_output_PGM[] = {
 
 //FIXME: add array to program memory
 //FIXME: port 13 doesn't have a macro PM13
-volatile uint8_t * port_to_mode_PGM[] = {
+static volatile uint8_t * port_to_mode_PGM[] = {
 	&PM0,
 	&PM1,
 	(volatile uint8_t*)NOT_A_PORT,
@@ -188,7 +188,7 @@ volatile uint8_t * port_to_mode_PGM[] = {
 	&PM15,
 };
 
-volatile uint8_t * port_to_pullup_PGM[] = {
+static volatile uint8_t * port_to_pullup_PGM[] = {
 	&PU0,
 	&PU1,
 	(volatile uint8_t*)NOT_A_PORT,
@@ -207,7 +207,7 @@ volatile uint8_t * port_to_pullup_PGM[] = {
 	&PU15,
 };
 
-volatile uint8_t digital_pin_to_bit_mask_PGM[] = {
+static volatile uint8_t digital_pin_to_bit_mask_PGM[] = {
 	NOT_A_PIN,
 	_BV(3),	/*P15*/
 	_BV(2),
@@ -312,7 +312,7 @@ volatile uint8_t digital_pin_to_bit_mask_PGM[] = {
 };
 
 // Hussein: edit this array to map the pin with timer
-volatile uint8_t digital_pin_to_timer_PGM[] = {
+static volatile uint8_t digital_pin_to_timer_PGM[] = {
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
