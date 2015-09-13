@@ -187,4 +187,14 @@ void init()
     PMC12 &= 0xFEU;
     P12 &= 0xFEU;
     PM12 &= 0xFEU;
+
+
+//
+//    TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+//    TMMK00 = 0U;    /* enable INTTM00 interrupt */
+//    TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+//    TMMK01 = 0U;    /* enable INTTM01 interrupt */
+//    TOE0 |= _0002_TAU_CH1_OUTPUT_ENABLE;
+//    TS0 |= _0001_TAU_CH0_START_TRG_ON | _0002_TAU_CH1_START_TRG_ON;
+
 }

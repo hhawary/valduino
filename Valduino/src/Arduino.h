@@ -42,6 +42,7 @@
 #endif
 
 #include "binary.h"
+//#include "pins_arduino.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -128,7 +129,9 @@ int atexit(void (*func)()) __attribute__((weak));
 void pinMode(uint8_t, uint8_t);
 void digitalWrite(uint8_t, uint8_t);
 int digitalRead(uint8_t);
-
+int analogRead(uint8_t);
+void analogReference(uint8_t mode);
+void analogWrite(uint8_t, int);
 
 void setup(void);
 void loop(void);
@@ -146,9 +149,32 @@ void loop(void);
 #define portInputRegister(P) port_to_output_PGM[P]
 #define portPullRegister(P)	port_to_pullup_PGM[P]
 #define portModeRegister(P) port_to_mode_PGM[P]
+//#define digitalPinToTimer(P) ( pgm_read_byte( digital_pin_to_timer_PGM + (P) ) ) //TODO: Hussein: edit this to select the timer map it with a io port
 
 #define NOT_A_PIN 255
 #define NOT_A_PORT 255
+//TODO: Asmaa: Edit this part to define all the timer channels here
+#define NOT_ON_TIMER 0
+#define TIMER0A 1
+#define TIMER0B 2
+#define TIMER1A 3
+#define TIMER1B 4
+#define TIMER1C 5
+#define TIMER2  6
+#define TIMER2A 7
+#define TIMER2B 8
+
+#define TIMER3A 9
+#define TIMER3B 10
+#define TIMER3C 11
+#define TIMER4A 12
+#define TIMER4B 13
+#define TIMER4C 14
+#define TIMER4D 15
+#define TIMER5A 16
+#define TIMER5B 17
+#define TIMER5C 18
+
 
 #ifdef VALDUINO
 #define _P0 0

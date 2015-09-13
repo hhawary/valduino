@@ -26,9 +26,9 @@
 /*
  * To define the PU include iodefine_ext.h
  */
-//#ifndef	IODEFINE_EXT_H
+#ifndef	IODEFINE_EXT_H
 #include "iodefine_ext.h"
-//#endif
+#endif
 
 /*
  * To define the P and PM include iodefine.h
@@ -42,6 +42,7 @@
 //HUSSEIN: ADD VALDUINO DEFINE HERE PLZ
 #ifdef VALDUINO
 
+#define digitalPinHasPWM(p)         ((p) == 9 || (p) == 10 || (p) == 11) //TODO: Hussein: add all ports that support PWM
 //FIXME: add array to program memory
 volatile uint8_t digital_pin_to_port_PGM[] = {
 	NOT_A_PORT,
@@ -310,6 +311,45 @@ volatile uint8_t digital_pin_to_bit_mask_PGM[] = {
 	_BV(5),	/*P12*/
 	_BV(0),
 };
+
+// TODO: Hussein: edit this array to map the pin with timer
+//volatile uint8_t digital_pin_to_timer_PGM[] = {
+//	NOT_ON_TIMER, /* 0 - port D */
+//	NOT_ON_TIMER,
+//	NOT_ON_TIMER,
+//	// on the ATmega168, digital pin 3 has hardware pwm
+//#if defined(__AVR_ATmega8__)
+//	NOT_ON_TIMER,
+//#else
+//	TIMER2B,
+//#endif
+//	NOT_ON_TIMER,
+//	// on the ATmega168, digital pins 5 and 6 have hardware pwm
+//#if defined(__AVR_ATmega8__)
+//	NOT_ON_TIMER,
+//	NOT_ON_TIMER,
+//#else
+//	TIMER0B,
+//	TIMER0A,
+//#endif
+//	NOT_ON_TIMER,
+//	NOT_ON_TIMER, /* 8 - port B */
+//	TIMER1A,
+//	TIMER1B,
+//#if defined(__AVR_ATmega8__)
+//	TIMER2,
+//#else
+//	TIMER2A,
+//#endif
+//	NOT_ON_TIMER,
+//	NOT_ON_TIMER,
+//	NOT_ON_TIMER,
+//	NOT_ON_TIMER, /* 14 - port C */
+//	NOT_ON_TIMER,
+//	NOT_ON_TIMER,
+//	NOT_ON_TIMER,
+//	NOT_ON_TIMER,
+//};
 
 #endif
 
