@@ -125,8 +125,8 @@ void analogWrite(uint8_t pin, int val)
 		switch(digitalPinToTimer(pin))
 		{
 
-		// FIXME: Add support for OS Timers :)
-			//START Unit 0
+			// FIXME: Add support for OS Timers :)
+			// START Unit 0
 			case TIMER01:
 				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
 				TMMK00 = 0U;    /* enable INTTM00 interrupt */
