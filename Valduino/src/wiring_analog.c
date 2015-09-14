@@ -124,6 +124,9 @@ void analogWrite(uint8_t pin, int val)
 	{
 		switch(digitalPinToTimer(pin))
 		{
+
+		// FIXME: Add support for OS Timers :)
+			//START Unit 0
 			case TIMER01:
 				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
 				TMMK00 = 0U;    /* enable INTTM00 interrupt */
@@ -136,120 +139,169 @@ void analogWrite(uint8_t pin, int val)
 				TS0 |= _BV(0) | _BV(1); // Start channel 0 (master) and channel 1 (slave)
 
 				break;
-				// TODO: Hussein continue the timers period 2.04ms for [unit0] master channel 2 - ch3 to ch7 (slaves)
+				// Hussein continue the timers period 2.04ms for [unit0] master channel 2 - ch3 to ch7 (slaves)
 				// for unit1 master channel 0 - ch1 to ch7 (slaves)
-				// FIXME: Add support for OS Timers :)
-				/*
-			case TIMER0A:
-				// connect pwm to pin on timer 0, channel A
-				sbi(TCCR0A, COM0A1);
-				OCR0A = val; // set pwm duty
+
+
+			case TIMER03:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR03 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE0 |= _BV(3); // Enable channel 3 in unit 0
+				TS0 |= _BV(2) | _BV(3); // Start channel 2 (master) and channel 3 (slave)
+
 				break;
 
-			case TIMER0B:
-				// connect pwm to pin on timer 0, channel B
-				sbi(TCCR0A, COM0B1);
-				OCR0B = val; // set pwm duty
+			case TIMER04:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR04 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE0 |= _BV(4); // Enable channel 4 in unit 0
+				TS0 |= _BV(2) | _BV(4); // Start channel 2 (master) and channel 4 (slave)
+
 				break;
 
-			case TIMER1A:
-				// connect pwm to pin on timer 1, channel A
-				sbi(TCCR1A, COM1A1);
-				OCR1A = val; // set pwm duty
+			case TIMER05:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR05 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE0 |= _BV(5); // Enable channel 5 in unit 0
+				TS0 |= _BV(2) | _BV(5); // Start channel 2 (master) and channel 5 (slave)
+
 				break;
 
-			case TIMER1B:
-				// connect pwm to pin on timer 1, channel B
-				sbi(TCCR1A, COM1B1);
-				OCR1B = val; // set pwm duty
-				break;
+			case TIMER06:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
 
-			case TIMER1C:
-				// connect pwm to pin on timer 1, channel B
-				sbi(TCCR1A, COM1C1);
-				OCR1C = val; // set pwm duty
-				break;
+				TDR06 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
-			case TIMER2:
-				// connect pwm to pin on timer 2
-				sbi(TCCR2, COM21);
-				OCR2 = val; // set pwm duty
-				break;
+				TOE0 |= _BV(6); // Enable channel 6 in unit 0
+				TS0 |= _BV(2) | _BV(6); // Start channel 2 (master) and channel 6 (slave)
 
-			case TIMER2A:
-				// connect pwm to pin on timer 2, channel A
-				sbi(TCCR2A, COM2A1);
-				OCR2A = val; // set pwm duty
-				break;
-
-			case TIMER2B:
-				// connect pwm to pin on timer 2, channel B
-				sbi(TCCR2A, COM2B1);
-				OCR2B = val; // set pwm duty
-				break;
-
-			case TIMER3A:
-				// connect pwm to pin on timer 3, channel A
-				sbi(TCCR3A, COM3A1);
-				OCR3A = val; // set pwm duty
-				break;
-
-			case TIMER3B:
-				// connect pwm to pin on timer 3, channel B
-				sbi(TCCR3A, COM3B1);
-				OCR3B = val; // set pwm duty
-				break;
-
-			case TIMER3C:
-				// connect pwm to pin on timer 3, channel C
-				sbi(TCCR3A, COM3C1);
-				OCR3C = val; // set pwm duty
-				break;
-
-			case TIMER4A:
-				//connect pwm to pin on timer 4, channel A
-				sbi(TCCR4A, COM4A1);
-				cbi(TCCR4A, COM4A0);
-				OCR4A = val;	// set pwm duty
-				break;
-			
-			case TIMER4B:
-				// connect pwm to pin on timer 4, channel B
-				sbi(TCCR4A, COM4B1);
-				OCR4B = val; // set pwm duty
-				break;
-
-			case TIMER4C:
-				// connect pwm to pin on timer 4, channel C
-				sbi(TCCR4A, COM4C1);
-				OCR4C = val; // set pwm duty
 				break;
 				
-			case TIMER4D:				
-				// connect pwm to pin on timer 4, channel D
-				sbi(TCCR4C, COM4D1);
-				cbi(TCCR4C, COM4D0);
-				OCR4D = val;	// set pwm duty
+			case TIMER07:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR07 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE0 |= _BV(7); // Enable channel 7 in unit 0
+				TS0 |= _BV(2) | _BV(7); // Start channel 2 (master) and channel 7 (slave)
+
 				break;
-							
-			case TIMER5A:
-				// connect pwm to pin on timer 5, channel A
-				sbi(TCCR5A, COM5A1);
-				OCR5A = val; // set pwm duty
+			//END Unit 0
+
+			//START Unit 1
+			case TIMER11:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR11 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE1 |= _BV(1); // Enable channel 1 in unit 1
+				TS1 |= _BV(0) | _BV(1); // Start channel 0 (master) and channel 1 (slave)
+
 				break;
 
-			case TIMER5B:
-				// connect pwm to pin on timer 5, channel B
-				sbi(TCCR5A, COM5B1);
-				OCR5B = val; // set pwm duty
+			case TIMER12:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR12 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE1 |= _BV(2); // Enable channel 2 in unit 1
+				TS1 |= _BV(0) | _BV(2); // Start channel 0 (master) and channel 2 (slave)
+
 				break;
 
-			case TIMER5C:
-				// connect pwm to pin on timer 5, channel C
-				sbi(TCCR5A, COM5C1);
-				OCR5C = val; // set pwm duty
+			case TIMER13:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR13 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE1 |= _BV(3); // Enable channel 3 in unit 0
+				TS1 |= _BV(0) | _BV(3); // Start channel 0 (master) and channel 3 (slave)
+
 				break;
-			*/
+
+			case TIMER14:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR14 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE1 |= _BV(4); // Enable channel 4 in unit 1
+				TS1 |= _BV(0) | _BV(4); // Start channel 0 (master) and channel 4 (slave)
+
+				break;
+
+			case TIMER15:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR15 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE1 |= _BV(5); // Enable channel 5 in unit 1
+				TS1 |= _BV(0) | _BV(5); // Start channel 0 (master) and channel 5 (slave)
+
+				break;
+
+			case TIMER16:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR16 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE1 |= _BV(6); // Enable channel 6 in unit 1
+				TS1 |= _BV(0) | _BV(6); // Start channel 0 (master) and channel 6 (slave)
+
+				break;
+
+			case TIMER17:
+				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+				TMMK00 = 0U;    /* enable INTTM00 interrupt */
+				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
+				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+
+				TDR17 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
+
+				TOE1 |= _BV(7); // Enable channel 7 in unit 1
+				TS1 |= _BV(0) | _BV(7); // Start channel 0 (master) and channel 7 (slave)
+
+				break;
+			//END Unit 1
+
 			case NOT_ON_TIMER:
 			default:
 				if (val < 128) {
