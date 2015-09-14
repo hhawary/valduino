@@ -144,10 +144,10 @@ void analogWrite(uint8_t pin, int val)
 
 
 			case TIMER03:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF02 = 0U;    /* clear INTTM02 interrupt flag */
+				TMMK02 = 0U;    /* enable INTTM02 interrupt */
+				TMIF03 = 0U;    /* clear INTTM03 interrupt flag */
+				TMMK03 = 0U;    /* enable INTTM03 interrupt */
 
 				TDR03 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -157,10 +157,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 
 			case TIMER04:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF02 = 0U;    /* clear INTTM02 interrupt flag */
+				TMMK02 = 0U;    /* enable INTTM02 interrupt */
+				TMIF04 = 0U;    /* clear INTTM04 interrupt flag */
+				TMMK04 = 0U;    /* enable INTTM04 interrupt */
 
 				TDR04 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -170,10 +170,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 
 			case TIMER05:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF02 = 0U;    /* clear INTTM02 interrupt flag */
+				TMMK02 = 0U;    /* enable INTTM02 interrupt */
+				TMIF05 = 0U;    /* clear INTTM05 interrupt flag */
+				TMMK05 = 0U;    /* enable INTTM05 interrupt */
 
 				TDR05 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -183,10 +183,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 
 			case TIMER06:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF02 = 0U;    /* clear INTTM02 interrupt flag */
+				TMMK02 = 0U;    /* enable INTTM02 interrupt */
+				TMIF06 = 0U;    /* clear INTTM06 interrupt flag */
+				TMMK06 = 0U;    /* enable INTTM06 interrupt */
 
 				TDR06 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -196,10 +196,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 				
 			case TIMER07:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF02 = 0U;    /* clear INTTM02 interrupt flag */
+				TMMK02 = 0U;    /* enable INTTM02 interrupt */
+				TMIF07 = 0U;    /* clear INTTM07 interrupt flag */
+				TMMK07 = 0U;    /* enable INTTM07 interrupt */
 
 				TDR07 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -211,10 +211,10 @@ void analogWrite(uint8_t pin, int val)
 
 			//START Unit 1
 			case TIMER11:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF10 = 0U;    /* clear INTTM10 interrupt flag */
+				TMMK10 = 0U;    /* enable INTTM10 interrupt */
+				TMIF11 = 0U;    /* clear INTTM11 interrupt flag */
+				TMMK11 = 0U;    /* enable INTTM11 interrupt */
 
 				TDR11 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -224,10 +224,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 
 			case TIMER12:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF10 = 0U;    /* clear INTTM10 interrupt flag */
+				TMMK10 = 0U;    /* enable INTTM10 interrupt */
+				TMIF12 = 0U;    /* clear INTTM12 interrupt flag */
+				TMMK12 = 0U;    /* enable INTTM12 interrupt */
 
 				TDR12 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -237,10 +237,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 
 			case TIMER13:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF10 = 0U;    /* clear INTTM10 interrupt flag */
+				TMMK10 = 0U;    /* enable INTTM10 interrupt */
+				TMIF13 = 0U;    /* clear INTTM13 interrupt flag */
+				TMMK13 = 0U;    /* enable INTTM13 interrupt */
 
 				TDR13 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -250,10 +250,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 
 			case TIMER14:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF10 = 0U;    /* clear INTTM10 interrupt flag */
+				TMMK10 = 0U;    /* enable INTTM10 interrupt */
+				TMIF14 = 0U;    /* clear INTTM14 interrupt flag */
+				TMMK14 = 0U;    /* enable INTTM14 interrupt */
 
 				TDR14 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -263,10 +263,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 
 			case TIMER15:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF10 = 0U;    /* clear INTTM10 interrupt flag */
+				TMMK10 = 0U;    /* enable INTTM10 interrupt */
+				TMIF15 = 0U;    /* clear INTTM15 interrupt flag */
+				TMMK15 = 0U;    /* enable INTTM15 interrupt */
 
 				TDR15 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -276,10 +276,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 
 			case TIMER16:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF10 = 0U;    /* clear INTTM10 interrupt flag */
+				TMMK10 = 0U;    /* enable INTTM10 interrupt */
+				TMIF16 = 0U;    /* clear INTTM16 interrupt flag */
+				TMMK16 = 0U;    /* enable INTTM16 interrupt */
 
 				TDR16 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
@@ -289,10 +289,10 @@ void analogWrite(uint8_t pin, int val)
 				break;
 
 			case TIMER17:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+				TMIF10 = 0U;    /* clear INTTM10 interrupt flag */
+				TMMK10 = 0U;    /* enable INTTM10 interrupt */
+				TMIF17 = 0U;    /* clear INTTM17 interrupt flag */
+				TMMK17 = 0U;    /* enable INTTM17 interrupt */
 
 				TDR17 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
 
