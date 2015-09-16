@@ -101,7 +101,7 @@ int analogRead(uint8_t pin)
 // pins_*.c file.  For the rest of the pins, we default
 // to digital output.
 
-// TODO: Asmaa: edit this section from AVR to RL78
+// Hussein: edit this section from AVR to RL78
 void analogWrite(uint8_t pin, int val)
 {
 	uint8_t timer = digitalPinToTimer(pin);
