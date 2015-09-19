@@ -276,7 +276,7 @@ int digitalRead(uint8_t pin)
 	uint8_t bit = digitalPinToBitMask(pin);
 	uint8_t port = digitalPinToPort(pin);
 
-	if (port == NOT_A_PIN) return LOW;
+	if (port == NOT_A_PORT) return LOW;
 
 	// If the pin that support PWM output, we need to turn it off
 	// before getting a digital reading.
