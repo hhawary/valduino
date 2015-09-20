@@ -23,7 +23,7 @@
 * Device(s)    : R5F10PPJ
 * Tool-Chain   : GCCRL78
 * Description  : This file implements device driver for TAU module.
-* Creation Date: 9/9/2015
+* Creation Date: 9/20/2015
 ***********************************************************************************************************************/
 
 #ifndef TAU_H
@@ -993,26 +993,66 @@ Macro definitions (Register bit)
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
-/* 16-bit timer data register 00 (TDR00) */
-#define _7FFF_TAU_TDR00_VALUE                   (0x7FFFU)
-/* 16-bit timer data register 01 (TDR01) */
-#define _4000_TAU_TDR01_VALUE                   (0x4000U)
 /* 16-bit timer data register 02 (TDR02) */
 #define _FEFF_TAU_TDR02_VALUE                   (0xFEFFU)
 /* 16-bit timer data register 03 (TDR03) */
 #define _7F80_TAU_TDR03_VALUE                   (0x7F80U)
 /* 16-bit timer data register 04 (TDR04) */
-#define _7F80_TAU_TDR04_VALUE                   (0x7F80U) //////////
-/* 16-bit timer data register 05 (TDR05) */
-#define _7F80_TAU_TDR05_VALUE                   (0x7F80U) /////////
+#define _7F80_TAU_TDR04_VALUE                   (0x7F80U)
 /* 16-bit timer data register 06 (TDR06) */
-#define _7F80_TAU_TDR06_VALUE                   (0x7F80U) //////////
+#define _7F80_TAU_TDR06_VALUE                   (0x7F80U)
 /* 16-bit timer data register 07 (TDR07) */
 #define _7F80_TAU_TDR07_VALUE                   (0x7F80U)
-/* Clock divisor for TAU0 channel 0 */
-#define _0001_TAU0_CHANNEL0_DIVISOR             (0x0001U)
-/* Clock divisor for TAU0 channel 1 */
-#define _0001_TAU0_CHANNEL1_DIVISOR             (0x0001U)
+/* Clock divisor for TAU0 channel 2 */
+#define _0001_TAU0_CHANNEL2_DIVISOR             (0x0001U)
+/* Clock divisor for TAU0 channel 3 */
+#define _0001_TAU0_CHANNEL3_DIVISOR             (0x0001U)
+/* Clock divisor for TAU0 channel 4 */
+#define _0001_TAU0_CHANNEL4_DIVISOR             (0x0001U)
+/* Clock divisor for TAU0 channel 6 */
+#define _0001_TAU0_CHANNEL6_DIVISOR             (0x0001U)
+/* Clock divisor for TAU0 channel 7 */
+#define _0001_TAU0_CHANNEL7_DIVISOR             (0x0001U)
+/* 16-bit timer data register 10 (TDR10) */
+#define _FEFF_TAU_TDR10_VALUE                   (0xFEFFU)
+/* 16-bit timer data register 11 (TDR11) */
+#define _7F80_TAU_TDR11_VALUE                   (0x7F80U)
+/* 16-bit timer data register 12 (TDR12) */
+#define _7F80_TAU_TDR12_VALUE                   (0x7F80U)
+/* 16-bit timer data register 13 (TDR13) */
+#define _7F80_TAU_TDR13_VALUE                   (0x7F80U)
+/* 16-bit timer data register 14 (TDR14) */
+#define _7F80_TAU_TDR14_VALUE                   (0x7F80U)
+/* 16-bit timer data register 15 (TDR15) */
+#define _7F80_TAU_TDR15_VALUE                   (0x7F80U)
+/* 16-bit timer data register 16 (TDR16) */
+#define _7F80_TAU_TDR16_VALUE                   (0x7F80U)
+/* 16-bit timer data register 17 (TDR17) */
+#define _7F80_TAU_TDR17_VALUE                   (0x7F80U)
+/* Clock divisor for TAU1 channel 0 */
+#define _0001_TAU1_CHANNEL0_DIVISOR             (0x0001U)
+/* Clock divisor for TAU1 channel 1 */
+#define _0001_TAU1_CHANNEL1_DIVISOR             (0x0001U)
+/* Clock divisor for TAU1 channel 2 */
+#define _0001_TAU1_CHANNEL2_DIVISOR             (0x0001U)
+/* Clock divisor for TAU1 channel 3 */
+#define _0001_TAU1_CHANNEL3_DIVISOR             (0x0001U)
+/* Clock divisor for TAU1 channel 4 */
+#define _0001_TAU1_CHANNEL4_DIVISOR             (0x0001U)
+/* Clock divisor for TAU1 channel 5 */
+#define _0001_TAU1_CHANNEL5_DIVISOR             (0x0001U)
+/* Clock divisor for TAU1 channel 6 */
+#define _0001_TAU1_CHANNEL6_DIVISOR             (0x0001U)
+/* Clock divisor for TAU1 channel 7 */
+#define _0001_TAU1_CHANNEL7_DIVISOR             (0x0001U)
+/* TMRD register A0 (TRDGRA0) */
+#define _03FF_TMRD_TRDGRA0_VALUE                (0x03FFU)
+/* TMRD register A1 (TRDGRA1) */
+#define _03FF_TMRD_TRDGRA1_VALUE                (0x03FFU)
+/* TMRD register B1 (TRDGRB1) */
+#define _01FF_TMRD_TRDGRB1_VALUE                (0x01FFU)
+/* TMRD register D1 (TRDGRD1) */
+#define _01FF_TMRD_TRDGRD1_VALUE                (0x01FFU)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -1030,8 +1070,14 @@ typedef enum
 Global functions
 ***********************************************************************************************************************/
 void R_TAU0_Create(void);
-void R_TAU0_Channel0_Start(void);
-void R_TAU0_Channel0_Stop(void);
+void R_TAU0_Channel2_Start(void);
+void R_TAU0_Channel2_Stop(void);
+void R_TAU1_Create(void);
+void R_TAU1_Channel0_Start(void);
+void R_TAU1_Channel0_Stop(void);
+void R_TMR_RD0_Create(void);
+void R_TMR_RD0_Start(void);
+void R_TMR_RD0_Stop(void);
 
 /* Start user code for function. Do not edit comment generated here */
 /* End user code. Do not edit comment generated here */

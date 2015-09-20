@@ -105,7 +105,7 @@ extern "C"{
 #define sei() EI()
 #define cli() DI()
 
-#define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
+//#define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 //#define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
 //#define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
 
@@ -161,7 +161,7 @@ void loop(void);
 
 // TDRmn -> Timer Data Register (master)
 // TDRmp -> Timer Data Register (slave)
-#define dutyToTDRmp(duty, TDRmn) (uint16_t)duty*(TDRmn+1)/255
+#define dutyToTDRmp(duty, TDRmn) (uint16_t)((duty/255.0)*(TDRmn+1))
 #define msperiodToTDRmn(msperiod) (uint16_t) ((msperiod*F_CPU)/1000)-1
 
 #define NOT_A_PIN 255

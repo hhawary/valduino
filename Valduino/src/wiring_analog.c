@@ -127,19 +127,41 @@ void analogWrite(uint8_t pin, int val)
 
 			// FIXME: Add support for OS Timers :)
 			// START Unit 0
-			case TIMER01:
-				TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-				TMMK00 = 0U;    /* enable INTTM00 interrupt */
-				TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-				TMMK01 = 0U;    /* enable INTTM01 interrupt */
+			case TIMER00: // MCU51 => TRDIOB1
+				TRDOER1 &= ~_BV(5); // Enable TRDIOB1
+			    POM1 &= 0x7FU;
+			    PM1 &= 0x7FU;
+			    P1 &= 0x7FU;
 
-				TDR01 = dutyToTDRmp(val, msperiodToTDRmn(1.024));
+			    volatile uint8_t trdsr_dummy;
+			    trdsr_dummy = TRDSR1; /* read TRDSR1 before write 0 */
+			    TRDSR1 = 0x00U; /* clear TRD1 each interrupt request */
 
-				TOE0 |= _BV(1); // Enable channel 1 in unit 0
-				TS0 |= _BV(0) | _BV(1); // Start channel 0 (master) and channel 1 (slave)
+			    // Set Duty Cycle
+			    TRDGRB1 = (uint16_t)((val/255.0)* 0x3FE); //MCU51 Max Value 0x3FE based on TRDGRA1 config
+
+			    //Page 554 RL78/F14 Datasheet
+			    TRDSTR |= _BV(3); //CSEL1
+			    TRDSTR |= _BV(1); //TSTART1 /* start TMRD1 counter */
 
 				break;
-				// Hussein continue the timers period 2.04ms for [unit0] master channel 2 - ch3 to ch7 (slaves)
+
+			case TIMER01: // MCU50 => TRDIOD1
+				TRDOER1 &= ~_BV(7); // Enable TRDIOD1
+				PM3 &= 0xFEU;
+				P3 &= 0xFEU;
+			    trdsr_dummy = TRDSR1; /* read TRDSR1 before write 0 */
+			    TRDSR1 = 0x00U; /* clear TRD1 each interrupt request */
+
+			    // Set Duty Cycle
+			    TRDGRD1 = (uint16_t)((val/255.0)* 0x3FE); //MCU50 Max Value 0x3FE based on TRDGRA1 config
+
+			    //Page 554 RL78/F14 Datasheet
+			    TRDSTR |= _BV(3); //CSEL1
+			    TRDSTR |= _BV(1); //TSTART1 /* start TMRD1 counter */
+
+				break;
+				// Hussein continue the timers period 2.04ms for [unit0] master channel 2 - ch3 to ch7 except ch5(slaves)
 				// for unit1 master channel 0 - ch1 to ch7 (slaves)
 
 
@@ -166,19 +188,6 @@ void analogWrite(uint8_t pin, int val)
 
 				TOE0 |= _BV(4); // Enable channel 4 in unit 0
 				TS0 |= _BV(2) | _BV(4); // Start channel 2 (master) and channel 4 (slave)
-
-				break;
-
-			case TIMER05:
-				TMIF02 = 0U;    /* clear INTTM02 interrupt flag */
-				TMMK02 = 0U;    /* enable INTTM02 interrupt */
-				TMIF05 = 0U;    /* clear INTTM05 interrupt flag */
-				TMMK05 = 0U;    /* enable INTTM05 interrupt */
-
-				TDR05 = dutyToTDRmp(val, msperiodToTDRmn(2.04));
-
-				TOE0 |= _BV(5); // Enable channel 5 in unit 0
-				TS0 |= _BV(2) | _BV(5); // Start channel 2 (master) and channel 5 (slave)
 
 				break;
 

@@ -90,15 +90,20 @@ static void turnOffPWM(uint8_t timer)
 	{
 	// FIXME: Add support for OS Timers :)
 	// START Unit 0
-	case TIMER01:
-		TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
-		TMMK00 = 1U;    /* disable INTTM00 interrupt */
-		TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
-		TMMK01 = 1U;    /* disable INTTM01 interrupt */
+	case TIMER00: // MCU51 => TRDIOB1
+	    TRDOER1 |= _BV(5) ; // Disable TRDIOB1
 
-		TOE0 &= ~_BV(1); // Disable channel 1 in unit 0
-		TT0 |= _BV(0) | _BV(1); // Stop channel 0 (master) and channel 1 (slave)
+	    volatile uint8_t trdsr_dummy;
+	    trdsr_dummy = TRDSR1; /* read TRDSR1 before write 0 */
+   	    TRDSR1 = 0x00U; /* clear TRD1 each interrupt request */
+		break;
 
+	case TIMER01: // MCU50 => TRDIOD1
+	    TRDOER1 |= _BV(7) ; // Disable TRDIOB1
+
+	    //volatile uint8_t trdsr_dummy;
+	    trdsr_dummy = TRDSR1; /* read TRDSR1 before write 0 */
+   	    TRDSR1 = 0x00U; /* clear TRD1 each interrupt request */
 		break;
 		// Hussein continue the timers period 2.04ms for [unit0] master channel 2 - ch3 to ch7 (slaves)
 		// for unit1 master channel 0 - ch1 to ch7 (slaves)

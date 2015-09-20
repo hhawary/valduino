@@ -27,21 +27,21 @@
 #endif
 #include "interrupt_handlers.h"
 
-// the prescaler is set so that timer0 ticks every 64 clock cycles, and the
-// the overflow handler is called every 256 ticks.
-#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(64 * 256)) // TODO: Any: check our prescaler and the ticks
+// the prescaler is set so that timer0 ticks every 1 clock cycles, and the
+// the overflow handler is called every 32 * 256 * 4 ticks. FIXME: Hossam: there is no overflow for now :(
+#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds((uint16_t)32 * 256 * 4)) // TODO: Any: check our prescaler and the ticks
 
 // the whole number of milliseconds per timer0 overflow
-#define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
+#define MILLIS_INC (uint8_t)(MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
 
 // the fractional number of milliseconds per timer0 overflow. we shift right
 // by three to fit these numbers into a byte. (for the clock speeds we care
 // about - 8 and 16 MHz - this doesn't lose precision.)
-#define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
+#define FRACT_INC (uint8_t)((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
 #define FRACT_MAX (1000 >> 3)
 
-volatile unsigned long timer0_overflow_count = 0;
-volatile unsigned long timer0_millis = 0;
+volatile unsigned long long timer0_overflow_count = 0;
+volatile unsigned long long timer0_millis = 0;
 static unsigned char timer0_fract = 0;
 
 /***************************************************************/
@@ -131,7 +131,28 @@ void INT_SR0 (void) { }
 /*
  * INT_TRD0 (0x1A)
  */
-void INT_TRD0 (void) { }
+void INT_TRD0 (void) {
+
+	// copy these to local variables so they can be stored in registers
+	// (volatile variables must be read from memory on every access)
+	unsigned long m = timer0_millis;
+	unsigned char f = timer0_fract;
+
+	m += MILLIS_INC; // +1.024ms @16MHz prescaler 64
+	f += FRACT_INC; // +3 @16MHz
+	if (f >= FRACT_MAX) { // FACT_MAX = (1000>>3) = 125 it means it takes 42 overflow interrupt to make the condition true (3*42 = 126)
+		f -= FRACT_MAX;
+		m += 1;
+	}
+
+	timer0_fract = f;
+	timer0_millis = m;
+	timer0_overflow_count++;
+
+	volatile uint8_t dummy; // Must read the status before clear it
+	dummy = TRDSR0;
+	TRDSR0 = 0;
+}
 
 /*
  * INT_TRD1 (0x1C)
@@ -178,23 +199,7 @@ void INT_RTC (void) { }
 /*
  * INT_TM00 (0x2C)
  */
-void INT_TM00 (void) {
-	// copy these to local variables so they can be stored in registers
-	// (volatile variables must be read from memory on every access)
-	unsigned long m = timer0_millis;
-	unsigned char f = timer0_fract;
-
-	m += MILLIS_INC;
-	f += FRACT_INC;
-	if (f >= FRACT_MAX) {
-		f -= FRACT_MAX;
-		m += 1;
-	}
-
-	timer0_fract = f;
-	timer0_millis = m;
-	timer0_overflow_count++;
-}
+void INT_TM00 (void) { }
 
 /*
  * INT_TM01 (0x2E)
@@ -543,43 +548,44 @@ unsigned long millis()
 	// inconsistent value (e.g. in the middle of a write to timer0_millis)
 	cli();
 	m = timer0_millis;
+	sei();
 	//SREG = oldSREG;
 
 	return m;
 }
 
-//unsigned long micros() {
-//	unsigned long m;
-//	uint8_t /*oldSREG = SREG,*/ t;
-//
-//	cli();
-//	m = timer0_overflow_count;
-//
-//#ifdef TIFR0
-//	if ((TIFR0 & _BV(TOV0)) && (t < 255))
-//		m++;
-//#else
-//	if ((TIFR & _BV(TOV0)) && (t < 255))
-//		m++;
-//#endif
-//
-//	//SREG = oldSREG;
-//
-//	return ((m << 8) + t) * (64 / clockCyclesPerMicrosecond());
-//}
+// http://garretlab.web.fc2.com/arduino/inside/arduino/wiring.c/micros.html
+unsigned long micros() {
+	unsigned long long m;
+	uint8_t /*oldSREG = SREG,*/ t;
 
-//void delay(unsigned long ms)
-//{
-//	uint16_t start = (uint16_t)micros();
-//
-//	while (ms > 0) {
-//		yield();
-//		if (((uint16_t)micros() - start) >= 1000) {
-//			ms--;
-//			start += 1000;
-//		}
-//	}
-//}
+	cli();
+	m = timer0_overflow_count;
+	t = TRD0; // TRD0 is the Timer 0 counter
+	if ((TRDSR0_bit.no0) && (t < (1023))) //TRDSR0_bit.no4 OVF , TRDSR0_bit.no0 IMFA Compare match flag A
+	{
+		//m++;
+		//TRDSR0 = 0;
+	}
+
+	//SREG = oldSREG;
+	sei();
+	//unsigned long reto = ((m << 15)/clockCyclesPerMicrosecond()) + (t/clockCyclesPerMicrosecond()) ;
+	return ( (m << 10) + t) * (32/clockCyclesPerMicrosecond()); // (m*256 + t) * (prescaler / (F_CPU / 1000000) ) where t is the counter counts and m the number of overflow and 256 because 256 count per overflow
+}
+
+void delay(unsigned long ms)
+{
+	uint32_t start = (uint32_t)millis();
+
+	while (ms > 0) {
+		//yield();	//FIXME: add support for this function
+		if (((uint32_t)millis() - start) >= 1) {
+			ms--;
+			start += 1;
+		}
+	}
+}
 
 ///* Delay for the given number of microseconds.  Assumes a 1, 8, 12, 16, 20 or 24 MHz clock. */
 //void delayMicroseconds(unsigned int us)
@@ -710,6 +716,9 @@ void init()
 	sei();
 	//EI();
 	/*Timers init*/
+
+	/*TAU0 Create*/
+
     TAU0EN = 1U;    /* supplies input clock */
     TPS0 = _0000_TAU_CKM0_FCLK_0 | _0000_TAU_CKM1_FCLK_0 | _0000_TAU_CKM2_FCLK_1 | _0000_TAU_CKM3_FCLK_8;
     /* Stop all channels */
@@ -748,12 +757,6 @@ void init()
     /* Mask channel 7 interrupt */
     TMMK07 = 1U;    /* disable INTTM07 interrupt */
     TMIF07 = 0U;    /* clear INTTM07 interrupt flag */
-    /* Set INTTM00 low priority */
-    TMPR100 = 1U;
-    TMPR000 = 1U;
-    /* Set INTTM01 low priority */
-    TMPR101 = 1U;
-    TMPR001 = 1U;
     /* Set INTTM02 low priority */
     TMPR102 = 1U;
     TMPR002 = 1U;
@@ -763,30 +766,12 @@ void init()
     /* Set INTTM04 low priority */
     TMPR104 = 1U;
     TMPR004 = 1U;
-    /* Set INTTM05 low priority */
-    TMPR105 = 1U;
-    TMPR005 = 1U;
     /* Set INTTM06 low priority */
     TMPR106 = 1U;
     TMPR006 = 1U;
     /* Set INTTM07 low priority */
     TMPR107 = 1U;
     TMPR007 = 1U;
-    /* Channel 0 is used as master channel for PWM output function */
-    TMR00 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_TRIGGER_SOFTWARE |
-            _0001_TAU_MODE_PWM_MASTER;
-    TDR00 = _7FFF_TAU_TDR00_VALUE;
-    TO0 &= ~_0001_TAU_CH0_OUTPUT_VALUE_1;
-    TOE0 &= ~_0001_TAU_CH0_OUTPUT_ENABLE;
-    /* Channel 1 is used as slave channel for PWM output function */
-    TMR01 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
-            _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
-    TDR01 = _4000_TAU_TDR01_VALUE;
-    TOM0 |= _0002_TAU_CH1_OUTPUT_COMBIN;
-    TOL0 &= ~_0002_TAU_CH1_OUTPUT_LEVEL_L;
-    TO0 &= ~_0002_TAU_CH1_OUTPUT_VALUE_1;
-    PWMDLY1 |= _0000_TO01_OUTPUT_DELAY_0;
-    TOE0 |= _0002_TAU_CH1_OUTPUT_ENABLE;
     /* Channel 2 is used as master channel for PWM output function */
     TMR02 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0800_TAU_COMBINATION_MASTER |
             _0000_TAU_TRIGGER_SOFTWARE | _0001_TAU_MODE_PWM_MASTER;
@@ -813,15 +798,6 @@ void init()
     TO0 &= ~_0010_TAU_CH4_OUTPUT_VALUE_1;
     PWMDLY1 |= _0000_TO04_OUTPUT_DELAY_0;
     TOE0 |= _0010_TAU_CH4_OUTPUT_ENABLE;
-    /* Channel 5 is used as slave channel for PWM output function */
-    TMR05 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
-            _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
-    TDR05 = _7F80_TAU_TDR05_VALUE;
-    TOM0 |= _0020_TAU_CH5_OUTPUT_COMBIN;
-    TOL0 &= ~_0020_TAU_CH5_OUTPUT_LEVEL_L;
-    TO0 &= ~_0020_TAU_CH5_OUTPUT_VALUE_1;
-    PWMDLY1 |= _0000_TO05_OUTPUT_DELAY_0;
-    TOE0 |= _0020_TAU_CH5_OUTPUT_ENABLE;
     /* Channel 6 is used as slave channel for PWM output function */
     TMR06 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
             _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
@@ -840,9 +816,6 @@ void init()
     TO0 &= ~_0080_TAU_CH7_OUTPUT_VALUE_1;
     PWMDLY1 |= _0000_TO07_OUTPUT_DELAY_0;
     TOE0 |= _0080_TAU_CH7_OUTPUT_ENABLE;
-    /* Set TO01 pin */
-    P3 &= 0xFEU;
-    PM3 &= 0xFEU;
     /* Set TO03 pin */
     PMC12 &= 0xDFU;
     P12 &= 0xDFU;
@@ -851,10 +824,6 @@ void init()
     POM1 &= 0xF7U;
     P1 &= 0xF7U;
     PM1 &= 0xF7U;
-    /* Set TO05 pin */
-    POM1 &= 0xDFU;
-    P1 &= 0xDFU;
-    PM1 &= 0xDFU;
     /* Set TO06 pin */
     POM1 &= 0xEFU;
     P1 &= 0xEFU;
@@ -866,7 +835,237 @@ void init()
     PM12 &= 0xFEU;
 
 
-//
+	/*TAU1 Create*/
+
+    TAU1EN = 1U;    /* supplies input clock */
+    TPS1 = _0000_TAU_CKM0_FCLK_0 | _0000_TAU_CKM1_FCLK_0 | _0000_TAU_CKM2_FCLK_1 | _0000_TAU_CKM3_FCLK_8;
+    /* Stop all channels */
+    TT1 = _0001_TAU_CH0_STOP_TRG_ON | _0002_TAU_CH1_STOP_TRG_ON | _0004_TAU_CH2_STOP_TRG_ON |
+          _0008_TAU_CH3_STOP_TRG_ON | _0010_TAU_CH4_STOP_TRG_ON | _0020_TAU_CH5_STOP_TRG_ON |
+          _0040_TAU_CH6_STOP_TRG_ON | _0080_TAU_CH7_STOP_TRG_ON | _0200_TAU_CH1_H8_STOP_TRG_ON |
+          _0800_TAU_CH3_H8_STOP_TRG_ON;
+    PWMDLY2 = _0000_TAU_PWM_DELAY_CLEAR;    /* clear PWM output delay */
+    /* Mask channel 0 interrupt */
+    TMMK10 = 1U;    /* disable INTTM10 interrupt */
+    TMIF10 = 0U;    /* clear INTTM10 interrupt flag */
+    /* Mask channel 1 interrupt */
+    TMMK11 = 1U;    /* disable INTTM11 interrupt */
+    TMIF11 = 0U;    /* clear INTTM11 interrupt flag */
+    /* Mask channel 1 higher 8 bits interrupt */
+    TMMK11H = 1U;    /* disable INTTM11H interrupt */
+    TMIF11H = 0U;    /* clear INTTM11H interrupt flag */
+    /* Mask channel 2 interrupt */
+    TMMK12 = 1U;    /* disable INTTM12 interrupt */
+    TMIF12 = 0U;    /* clear INTTM12 interrupt flag */
+    /* Mask channel 3 interrupt */
+    TMMK13 = 1U;    /* disable INTTM13 interrupt */
+    TMIF13 = 0U;    /* clear INTTM13 interrupt flag */
+    /* Mask channel 3 higher 8 bits interrupt */
+    TMMK13H = 1U;    /* disable INTTM13H interrupt */
+    TMIF13H = 0U;    /* clear INTTM13H interrupt flag */
+    /* Mask channel 4 interrupt */
+    TMMK14 = 1U;    /* disable INTTM14 interrupt */
+    TMIF14 = 0U;    /* clear INTTM14 interrupt flag */
+    /* Mask channel 5 interrupt */
+    TMMK15 = 1U;    /* disable INTTM15 interrupt */
+    TMIF15 = 0U;    /* clear INTTM15 interrupt flag */
+    /* Mask channel 6 interrupt */
+    TMMK16 = 1U;    /* disable INTTM16 interrupt */
+    TMIF16 = 0U;    /* clear INTTM16 interrupt flag */
+    /* Mask channel 7 interrupt */
+    TMMK17 = 1U;    /* disable INTTM17 interrupt */
+    TMIF17 = 0U;    /* clear INTTM17 interrupt flag */
+    /* Set INTTM10 low priority */
+    TMPR110 = 1U;
+    TMPR010 = 1U;
+    /* Set INTTM11 low priority */
+    TMPR111 = 1U;
+    TMPR011 = 1U;
+    /* Set INTTM12 low priority */
+    TMPR112 = 1U;
+    TMPR012 = 1U;
+    /* Set INTTM13 low priority */
+    TMPR113 = 1U;
+    TMPR013 = 1U;
+    /* Set INTTM14 low priority */
+    TMPR114 = 1U;
+    TMPR014 = 1U;
+    /* Set INTTM15 low priority */
+    TMPR115 = 1U;
+    TMPR015 = 1U;
+    /* Set INTTM16 low priority */
+    TMPR116 = 1U;
+    TMPR016 = 1U;
+    /* Set INTTM17 low priority */
+    TMPR117 = 1U;
+    TMPR017 = 1U;
+    /* Channel 0 is used as master channel for PWM output function */
+    TMR10 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_TRIGGER_SOFTWARE |
+            _0001_TAU_MODE_PWM_MASTER;
+    TDR10 = _FEFF_TAU_TDR10_VALUE;
+    TO1 &= ~_0001_TAU_CH0_OUTPUT_VALUE_1;
+    TOE1 &= ~_0001_TAU_CH0_OUTPUT_ENABLE;
+    /* Channel 1 is used as slave channel for PWM output function */
+    TMR11 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
+            _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
+    TDR11 = _7F80_TAU_TDR11_VALUE;
+    TOM1 |= _0002_TAU_CH1_OUTPUT_COMBIN;
+    TOL1 &= ~_0002_TAU_CH1_OUTPUT_LEVEL_L;
+    TO1 &= ~_0002_TAU_CH1_OUTPUT_VALUE_1;
+    PWMDLY2 |= _0000_TO11_OUTPUT_DELAY_0;
+    TOE1 |= _0002_TAU_CH1_OUTPUT_ENABLE;
+    /* Channel 2 is used as slave channel for PWM output function */
+    TMR12 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
+            _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
+    TDR12 = _7F80_TAU_TDR12_VALUE;
+    TOM1 |= _0004_TAU_CH2_OUTPUT_COMBIN;
+    TOL1 &= ~_0004_TAU_CH2_OUTPUT_LEVEL_L;
+    TO1 &= ~_0004_TAU_CH2_OUTPUT_VALUE_1;
+    PWMDLY2 |= _0000_TO12_OUTPUT_DELAY_0;
+    TOE1 |= _0004_TAU_CH2_OUTPUT_ENABLE;
+    /* Channel 3 is used as slave channel for PWM output function */
+    TMR13 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
+            _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
+    TDR13 = _7F80_TAU_TDR13_VALUE;
+    TOM1 |= _0008_TAU_CH3_OUTPUT_COMBIN;
+    TOL1 &= ~_0008_TAU_CH3_OUTPUT_LEVEL_L;
+    TO1 &= ~_0008_TAU_CH3_OUTPUT_VALUE_1;
+    PWMDLY2 |= _0000_TO13_OUTPUT_DELAY_0;
+    TOE1 |= _0008_TAU_CH3_OUTPUT_ENABLE;
+    /* Channel 4 is used as slave channel for PWM output function */
+    TMR14 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
+            _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
+    TDR14 = _7F80_TAU_TDR14_VALUE;
+    TOM1 |= _0010_TAU_CH4_OUTPUT_COMBIN;
+    TOL1 &= ~_0010_TAU_CH4_OUTPUT_LEVEL_L;
+    TO1 &= ~_0010_TAU_CH4_OUTPUT_VALUE_1;
+    PWMDLY2 |= _0000_TO14_OUTPUT_DELAY_0;
+    TOE1 |= _0010_TAU_CH4_OUTPUT_ENABLE;
+    /* Channel 5 is used as slave channel for PWM output function */
+    TMR15 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
+            _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
+    TDR15 = _7F80_TAU_TDR15_VALUE;
+    TOM1 |= _0020_TAU_CH5_OUTPUT_COMBIN;
+    TOL1 &= ~_0020_TAU_CH5_OUTPUT_LEVEL_L;
+    TO1 &= ~_0020_TAU_CH5_OUTPUT_VALUE_1;
+    PWMDLY2 |= _0000_TO15_OUTPUT_DELAY_0;
+    TOE1 |= _0020_TAU_CH5_OUTPUT_ENABLE;
+    /* Channel 6 is used as slave channel for PWM output function */
+    TMR16 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
+            _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
+    TDR16 = _7F80_TAU_TDR16_VALUE;
+    TOM1 |= _0040_TAU_CH6_OUTPUT_COMBIN;
+    TOL1 &= ~_0040_TAU_CH6_OUTPUT_LEVEL_L;
+    TO1 &= ~_0040_TAU_CH6_OUTPUT_VALUE_1;
+    PWMDLY2 |= _0000_TO16_OUTPUT_DELAY_0;
+    TOE1 |= _0040_TAU_CH6_OUTPUT_ENABLE;
+    /* Channel 7 is used as slave channel for PWM output function */
+    TMR17 = _0000_TAU_CLOCK_SELECT_CKM0 | _0000_TAU_CLOCK_MODE_CKS | _0000_TAU_COMBINATION_SLAVE |
+            _0400_TAU_TRIGGER_MASTER_INT | _0009_TAU_MODE_PWM_SLAVE;
+    TDR17 = _7F80_TAU_TDR17_VALUE;
+    TOM1 |= _0080_TAU_CH7_OUTPUT_COMBIN;
+    TOL1 &= ~_0080_TAU_CH7_OUTPUT_LEVEL_L;
+    TO1 &= ~_0080_TAU_CH7_OUTPUT_VALUE_1;
+    PWMDLY2 |= _0000_TO17_OUTPUT_DELAY_0;
+    TOE1 |= _0080_TAU_CH7_OUTPUT_ENABLE;
+    /* Set TO11 pin */
+    POM1 &= 0xFBU;
+    P1 &= 0xFBU;
+    PM1 &= 0xFBU;
+    /* Set TO12 pin */
+    POM1 &= 0xFDU;
+    P1 &= 0xFDU;
+    PM1 &= 0xFDU;
+    /* Set TO13 pin */
+    POM1 &= 0xFEU;
+    P1 &= 0xFEU;
+    PM1 &= 0xFEU;
+    /* Set TO14 pin */
+    P3 &= 0xFDU;
+    PM3 &= 0xFDU;
+    /* Set TO15 pin */
+    POM7 &= 0xFEU;
+    PMC7 &= 0xFEU;
+    P7 &= 0xFEU;
+    PM7 &= 0xFEU;
+    /* Set TO16 pin */
+    P3 &= 0xFBU;
+    PM3 &= 0xFBU;
+    /* Set TO17 pin */
+    POM7 &= 0xFDU;
+    PMC7 &= 0xFDU;
+    P7 &= 0xFDU;
+    PM7 &= 0xFDU;
+
+    /* RD0 Create */
+    TRD0EN = 1U;    /* enable input clock supply */
+    TRDSTR |= _04_TMRD_TRD0_COUNT_CONTINUES | _08_TMRD_TRD1_COUNT_CONTINUES;
+    TRDSTR &= (uint8_t)~_03_TRD_COUNT_STATR_INITIAL_VALUE;  /* disable TMRD operation */
+    PWMDLY0 = _0000_TMRD_PWM_DELAY_CLEAR;    /* clear PWM output delay */
+    TRDMK0 = 1U;    /* disable TMRD0 interrupt */
+    TRDIF0 = 0U;    /* clear TMRD0 interrupt flag */
+    TRDMK1 = 1U;    /* disable TMRD1 interrupt */
+    TRDIF1 = 0U;    /* clear TMRD1 interrupt flag */
+    /* Set INTTRD0 low priority */
+    TRDPR10 = 1U;
+    TRDPR00 = 1U;
+    TRDMR = _00_TMRD_TRDGRC0_GENERAL | _00_TMRD_TRDGRD0_GENERAL | _00_TMRD_TRDGRC1_GENERAL | _00_TMRD_TRDGRD1_GENERAL;
+    TRDPMR = _10_TMRD_TRDIOB1_PWM_MODE | _40_TMRD_TRDIOD1_PWM_MODE;
+    TRDDF0 = _00_TMRD_TRDIOD_FORCEDCUTOFF_DISABLE | _00_TMRD_TRDIOC_FORCEDCUTOFF_DISABLE |
+             _00_TMRD_TRDIOB_FORCEDCUTOFF_DISABLE;
+    TRDDF1 = _00_TMRD_TRDIOD_FORCEDCUTOFF_DISABLE | _00_TMRD_TRDIOC_FORCEDCUTOFF_DISABLE |
+             _00_TMRD_TRDIOB_FORCEDCUTOFF_DISABLE;
+    PWMDLY0 = _0000_TMRD_TRDIOB1_OUTPUT_DELAY_0 | _0000_TMRD_TRDIOD1_OUTPUT_DELAY_0;
+    TRDOER1 = _01_TMRD_TRDIOA0_OUTPUT_DISABLE | _02_TMRD_TRDIOB0_OUTPUT_DISABLE | _04_TMRD_TRDIOC0_OUTPUT_DISABLE |
+              _08_TMRD_TRDIOD0_OUTPUT_DISABLE | _10_TMRD_TRDIOA1_OUTPUT_DISABLE | _20_TMRD_TRDIOB1_OUTPUT_DISABLE |
+              _40_TMRD_TRDIOC1_OUTPUT_DISABLE | _80_TMRD_TRDIOD1_OUTPUT_DISABLE;
+
+    TRDOCR = _00_TMRD_TRDIOB1_INITIAL_OUTPUT_L | _00_TMRD_TRDIOD1_INITIAL_OUTPUT_L;
+    TRDCR0 = _04_TMRD_INTERNAL_CLOCK_F32 | _20_TMRD_COUNTER_CLEAR_TRDGRA;
+    TRDCR1 = _04_TMRD_INTERNAL_CLOCK_F32 | _20_TMRD_COUNTER_CLEAR_TRDGRA;
+    TRDIER0 = _01_TMRD_IMIA_ENABLE | _00_TMRD_IMIB_DISABLE | _00_TMRD_IMIC_DISABLE | _00_TMRD_IMID_DISABLE |
+              _00_TMRD_OVIE_DISABLE;
+    TRDIER1 = _00_TMRD_IMIA_DISABLE | _00_TMRD_IMIB_DISABLE | _00_TMRD_IMIC_DISABLE | _00_TMRD_IMID_DISABLE |
+              _00_TMRD_OVIE_DISABLE;
+    TRDPOCR1 = _00_TMRD_TRDIOB_OUTPUT_ACTIVE_L | _00_TMRD_TRDIOD_OUTPUT_ACTIVE_L;
+
+    //TRDGRA0 = _7FFF_TMRD_TRDGRA0_VALUE;
+	TRDGRA0 = 256*4;//256*64*2;//0xffff;//0x7FFF; //generate the 1024 tick with 32 prescaler
+	//TRDGRA1 = _3FF_TMRD_TRDGRA1_VALUE;
+
+	TRDGRA1 = 0x3ff;//0x3FF; // 0x3FF 1ms period for TRDGRB1 & TRDGRD1
+	TRDGRB1 = 0x3FF/2-1; //MCU51
+	TRDGRD1 = 0x3FF/2-1; // MCU50 //Maximum Value 0x3ff -1
+
+	/* Set TRDIOB1 pin */
+//    POM1 &= 0x7FU;
+//    PM1 &= 0x7FU;
+//    P1 &= 0x7FU;
+
+    /* Set TRDIOD1 pin */
+//    PM3 &= 0xFEU;
+//    P3 &= 0xFEU;
+
+    volatile uint8_t trdsr_dummy;
+
+	TRDIF0 = 0U;    /* clear TMRD0 interrupt flag */
+	trdsr_dummy = TRDSR0; /* read TRDSR0 before write 0 */
+	TRDSR0 = 0x00U; /* clear TRD0 each interrupt request */
+	TRDMK0 = 0U;    /* enable TMRD0 interrupt */
+    // Start TRDGRA0 required for millis and micros functions
+    TRDSTR |= _BV(2); // Enable CSEL0
+    TRDSTR |= _BV(0); // Start TRD0 (TSTART0)
+
+
+
+
+
+
+//    TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
+//	TMMK00 = 0U;    /* enable INTTM00 interrupt */
+//	TS0 |= _BV(0);
+
+
 //    TMIF00 = 0U;    /* clear INTTM00 interrupt flag */
 //    TMMK00 = 0U;    /* enable INTTM00 interrupt */
 //    TMIF01 = 0U;    /* clear INTTM01 interrupt flag */
